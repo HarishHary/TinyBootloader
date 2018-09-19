@@ -1,0 +1,158 @@
+_check_A20:
+    pushf
+    push %ds
+    push %es
+    push %di
+    push %si
+    cli
+    xor %ax, %ax
+    mov %ax, %es
+    not %ax
+    mov %ax, %ds
+    mov $0x0500, %di
+    mov $0x0510, %si
+    movb %es:di, %al
+    push %ax
+    movb %ds:si, %al
+    push %ax
+    movb $0x00, %es:di
+    movb $0xFF, %ds:si
+    cmpb $0xFF, %es:di
+    pop %ax
+    movb %al, %ds:si
+    pop %ax
+    movb %al, %es:di
+    mov $0, %ax
+    je _check_A20_EXIT
+    mov $1, %ax
+
+_check_A20_EXIT:
+    pop %si
+    pop %di
+    pop %es
+    pop %ds
+    popf
+    ret
+
+_enable_A20_BIOS:
+    mov $0x2401, %ax
+    int $0x15
+    ret
+
+_enable_A20_KBC:
+    cli
+    call _a20wait
+    mov $0xAD, %al
+    outb %al, $0x64
+    call _a20wait
+    mov $0xD0, %al
+    outb %al, $0x64
+    call _a20wait2
+    inb $0x60, %al
+    push %eax
+    call _a20wait
+    mov $0xD1, %al
+    outb %al, $0x64
+    call _a20wait
+    pop %eax
+    or $2, %al
+    outb %al, $0x60
+    call _a20wait
+    mov $0xAE, %al
+    outb %al, $0x64
+    call _a20wait
+    sti
+    ret
+
+_a20wait:
+    in $0x64, %al
+    test $2, %al
+    jnz _a20wait
+    ret
+
+_a20wait2:
+    inb $0x64, %al
+    test $1, %al
+    jz _a20wait2
+    ret
+
+_enable_A20_FAST_GATE:
+    inb $0x92, %al
+    or $2, %al
+    outb %al, $0x92
+    ret
+
+########### ENABLE A20 ###########
+_enable_A20:
+    call _check_A20
+    cmp  $0, %ax
+    jne  _enable_A20_EXIT
+    call _enable_A20_BIOS
+    call _check_A20
+    cmp  $0, %ax
+    jne  _enable_A20_EXIT
+    call _enable_A20_KBC
+    call _check_A20
+    cmp  $0, %ax
+    jne  _enable_A20_EXIT
+    call _enable_A20_FAST_GATE
+    call _check_A20
+    xchg %bx, %bx
+    cmp $0, %ax
+    jne  _enable_A20_ERROR
+_enable_A20_EXIT:
+    ret
+_enable_A20_ERROR:
+    hlt
+
+
+_check_A20:
+    xor %ax, %ax
+    mov $0xffff, %ds
+    mov $0x7e0e, %ax,
+    mov (%ax), %dx
+    cmp $0xaa55, %dx
+    jne _check_A20_SUCCESS
+    shr $8, %ax
+    mov (%ax), %dx
+    cmp $0xaa55, %dx
+    jne _check_A20_SUCCESS
+    mov $1, %ax
+    ret
+_check_A20_SUCCESS:
+    mov $0, %ax
+    ret
+
+
+
+    while (loops--) {
+            Type::u16 boot_id = 0xaa55;
+            Type::u16 test;
+            asm volatile("mov cx, ds\n"
+                         "mov ds, %w1\n"
+                         "mov %0, [%2]\n"
+                         "mov ds, cx"
+                         : "=r" (test)
+                         : "r" (0xffff), "r" (0x7e0e)
+                         : "ecx");
+            if (boot_id == test)
+            {
+              asm volatile("mov [%2], %1\n"
+                           "mov cx, ds\n"
+                           "mov ds, %w3\n"
+                           "mov %0, [%4]\n"
+                           "mov ds, cx"
+                           : "=r" (test)
+                           : "r" (boot_id >> 8), "r" (0x7dfe),
+                             "r" (0xffff), "r" (0x7e0e)
+                           : "ecx");
+              asm volatile("mov [%1], %0"
+                               :: "r" (boot_id), "r" (0x7dfe));
+              if ((boot_id >> 8) != test)
+                return 1;
+            }
+            else
+              return 1;
+  	}
+
+  	return 0;
