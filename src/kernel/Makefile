@@ -24,11 +24,12 @@ LDFLAGS += -nostdlib
 
 ELF = kernel
 
-OBJS = 	kernel.o \
+OBJS = 	main.o   \
 				printf.o \
 				serial.o \
-				../common/idt.o \
-				../common/interrupt.o
+				cpuid.o  \
+				paging.o \
+				../common/idt.o
 
 KERNEL = kernel.raw
 
@@ -39,9 +40,6 @@ $(ELF): $(OBJS)
 
 $(KERNEL):	$(ELF)
 						objcopy -O binary $^ $@
-
-../common/interrupt.o:
-	$(CC) $(CFLAGS) -c ../common/interrupt.S -o ../common/interrupt.o
 
 clean:
 	$(RM) $(ELF) $(KERNEL) $(OBJS)

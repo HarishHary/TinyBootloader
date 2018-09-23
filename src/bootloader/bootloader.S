@@ -19,96 +19,6 @@ call _read_section_drive
 call _init_gdt
 hlt
 
-########### CHECK A20 LINE ########### (FIXME)
-_check_A20:
-    mov $0xffff, %bx
-    mov %bx, %ds
-    mov $0x7e0e, %bx
-    mov (%bx), %dx
-    cmp $0xaa55, %dx
-    jne _check_A20_SUCCESS
-
-    shr $8, %bx
-
-    mov (%bx), %dx
-    cmp $0xaa55, %dx
-    jne _check_A20_SUCCESS
-    mov $0, %bx
-    ret
-_check_A20_SUCCESS:
-    mov $1, %ax
-    ret
-
-########### DIFFERENT TECHNIQUES TO ENABLE A20 LINE ###########
-_enable_A20_BIOS:
-    mov $0x2401, %ax
-    int $0x15
-    ret
-
-_enable_A20_KBC:
-    cli
-    call _a20wait
-    mov $0xAD, %al
-    outb %al, $0x64
-    call _a20wait
-    mov $0xD0, %al
-    outb %al, $0x64
-    call _a20wait2
-    inb $0x60, %al
-    push %eax
-    call _a20wait
-    mov $0xD1, %al
-    outb %al, $0x64
-    call _a20wait
-    pop %eax
-    or $2, %al
-    outb %al, $0x60
-    call _a20wait
-    mov $0xAE, %al
-    outb %al, $0x64
-    call _a20wait
-    sti
-    ret
-_a20wait:
-    in $0x64, %al
-    test $2, %al
-    jnz _a20wait
-    ret
-_a20wait2:
-    inb $0x64, %al
-    test $1, %al
-    jz _a20wait2
-    ret
-
-_enable_A20_FAST_GATE:
-    inb $0x92, %al
-    or $2, %al
-    outb %al, $0x92
-    ret
-
-########### ENABLE A20 ###########
-_enable_A20:
-    call _check_A20
-    cmp  $0, %ax
-    jne  _enable_A20_EXIT
-    call _enable_A20_BIOS
-    call _check_A20
-    cmp  $0, %ax
-    jne  _enable_A20_EXIT
-    call _enable_A20_KBC
-    call _check_A20
-    cmp  $0, %ax
-    jne  _enable_A20_EXIT
-    call _enable_A20_FAST_GATE
-    call _check_A20
-    xchg %bx, %bx
-    cmp $0, %ax
-    jne  _enable_A20_ERROR
-_enable_A20_EXIT:
-    ret
-_enable_A20_ERROR:
-    hlt
-
 ########### FIND AVAILABLE RAM ZONE ###########
 _do_e820:
     xorl %ebx, %ebx
@@ -258,4 +168,7 @@ _init_gdt:
 
 .code32
 _protected_mode:
+    push $KERNEL_SIZE #WEIRD ISSUE NEED TO INVESTIGATE
+    push (base)
+    push $KERNEL_SIZE
     jmp *base

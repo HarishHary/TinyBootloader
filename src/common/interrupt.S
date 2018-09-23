@@ -1,5 +1,5 @@
 .section .text
-.macro idtentry sym:req num:req has_no_error_code=0
+.macro idtentry sym:req num:req has_no_error_code=1
 	.global \sym
 	.type \sym, @function
 \sym:
@@ -24,6 +24,7 @@
         pop %es
         pop %ds
         popa
+
         iret
         .size \sym, . - \sym
         .endm
@@ -37,16 +38,16 @@
         idtentry isr5, 5
         idtentry isr6, 6
         idtentry isr7, 7
-        idtentry isr8, 8, 1
+        idtentry isr8, 8, 0
         idtentry isr9, 9
-        idtentry isr10, 10, 1
-        idtentry isr11, 11, 1
-        idtentry isr12, 12, 1
-        idtentry isr13, 13, 1
-        idtentry isr14, 14, 1
+        idtentry isr10, 10, 0
+        idtentry isr11, 11, 0
+        idtentry isr12, 12, 0
+        idtentry isr13, 13, 0
+        idtentry isr14, 14, 0
         idtentry isr15, 15
         idtentry isr16, 16
-        idtentry isr17, 17, 1
+        idtentry isr17, 17, 0
         idtentry isr18, 18
         idtentry isr19, 19
         idtentry isr20, 20
