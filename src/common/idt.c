@@ -12,6 +12,7 @@
 void init_idt(void)
 {
     static idt idt_g[32];
+    define_print(0);
     define_print(1);
     define_print(2);
     define_print(3);
@@ -32,6 +33,7 @@ void init_idt(void)
     define_print(18);
     define_print(19);
     define_print(20);
+    define_print(21);
     define_print(22);
     define_print(23);
     define_print(24);
@@ -63,9 +65,4 @@ void idt_set_gate(unsigned long offset, unsigned short ss, idt_flags flags,
     idt_g->type8_11     = flags & 0x1F;
     idt_g->dpl          = flags >> 5;
     idt_g->p            = 1;
-}
-
-void idt_print(u32 num)
-{
-    write("Interrupt X", 12);
 }

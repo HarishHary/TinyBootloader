@@ -61,4 +61,3 @@ typedef enum idt_traps {
 void init_idt(void);
 void idt_set_gate(unsigned long offset, unsigned short ss, idt_flags flags,
 		  idt *idt_g);
-void idt_print(u32 num);

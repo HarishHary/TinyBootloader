@@ -21,7 +21,9 @@ void main(const u32 kaddr, const u32 klen)
     __asm__ __volatile__("mov %%ebp, %0"
                          :"=r"(saddr)
                        );
-    u32 slen = 8192;
+    saddr += kaddr;
+    saddr = (saddr + 4096 - 1) & ~(4096 - 1);
+    u32 slen = 16384;
 
     //init page tables
     page pages = { .pml4 = {0}, .pdpt = {0}, .pdt = {0}, .pt = {0}};
@@ -29,7 +31,7 @@ void main(const u32 kaddr, const u32 klen)
       __asm__ __volatile__("hlt");
 
     //enable paging
-    enable_paging((unsigned long)pages.pml4);
+    enable_paging((u32)&pages.pml4);
 
     //enable 64 gdt
 

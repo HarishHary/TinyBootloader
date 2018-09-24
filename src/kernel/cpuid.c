@@ -32,7 +32,6 @@ static int check_cpuid_support()
   return eflags != flipped_eflags;
 }
 
-
 int check_support()
 {
   const u32 LM_BIT = (1 << 29);
