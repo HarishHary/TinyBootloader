@@ -91,7 +91,7 @@ typedef struct __attribute__((__packed__)) gdt
 typedef struct __attribute__((__packed__)) gdt_r
 {
     u16 limit;
-    u32 base;
+    u64 base;
 } gdt_r;
 
 void init_gdt(void);

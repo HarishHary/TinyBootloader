@@ -3,7 +3,12 @@
 #include "types.h"
 #include "gdt.h"
 
-typedef gdt_r idt_r;
+typedef struct __attribute__((__packed__)) idt_r
+{
+    u16 limit;
+    u32 base;
+} idt_r;
+
 
 typedef struct __attribute__((__packed__)) idt
 {
