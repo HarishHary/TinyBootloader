@@ -25,14 +25,14 @@ LDFLAGS += -nostdlib
 ELF = kernel
 
 OBJS32 = 	main32.o \
-					printf.o \
 					serial.o \
 					cpuid.o  \
 					paging.o \
 					../common/idt.o \
 					../common/gdt.o \
 
-OBJS64 = main64.o
+OBJS64 = main64.o \
+				 printf.o \
 
 KERNEL = kernel.raw
 
