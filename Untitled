@@ -87,3 +87,30 @@ _enable_A20_EXIT:
     ret
 _enable_A20_ERROR:
     hlt
+
+
+    init_gdt_segment(0x0, 0x0, 0x0,
+                     0x0, 0x0, 0x0,
+                     0x0, 0x0, 0x0,
+                     0x0, 0x0, 0x0,
+                     0x0, &gdt_g[0]);
+    /*
+     * Kernel code segment
+     */
+    init_gdt_segment(0xffff, 0x0, 0x0,
+                     TYPE_ER, S_CD_DT, R0,
+                     0x1, 0xff, 0x0,
+                     0x0, DB_32b, 0x1,
+                     0x0, &gdt_g[1]);
+    /*
+     * Kernel data segment
+     */
+    init_gdt_segment(0xffff, 0x0, 0x0,
+                     TYPE_RW, S_CD_DT, R0,
+                     0x1, 0xff, 0x0,
+                     0x0, DB_32b, 0x1,
+                     0x0, &gdt_g[2]);
+
+0x0000000000000000
+0x00cf9b000000ffff
+0x00cf93000000ffff

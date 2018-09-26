@@ -6,8 +6,8 @@ int init_page_tables(u32 kaddr, u32 ksize, u32 saddr, u32 ssize, page *page_g) {
     return 0;
 
   //mapping of the stack
-  // if (!mapping(saddr, ssize, page_g, 1))
-  //   return 0;
+  if (!mapping(saddr, ssize, page_g, 1))
+    return 0;
 
   return 1;
 }
@@ -16,7 +16,7 @@ void enable_paging(u32 pml4_addr) {
   //load P4 to cr3 register (cpu uses this to access the P4 table)
   __asm__ __volatile__("mov %0, %%cr3"
                       :
-                      :"r"(pml4_addr)
+                      :"r"(pml4_addr | 0x3)
                       );
 
   //enable PAE-flag in cr4 (Physical Address Extension)
@@ -36,7 +36,6 @@ void enable_paging(u32 pml4_addr) {
   __asm__ __volatile__ ("rdmsr"
                     : "=a" (low), "=d" (high)
                     : "c"(0xC0000080));
-
   u64 val = (((u64)high << 32) | low);
   val = val | (1 << 8);
   __asm__ __volatile__ ("wrmsr"
@@ -67,7 +66,7 @@ int mapping(u32 addr, u32 size, page *page_g, int descending)
   volatile const u32 pdpt_off = (addr >> 30) & 0x1ff;
 
   if (page_g->pml4[0] == 0)
-    page_g->pml4[0] = (u32)(page_g->pdpt)| PAGE_FLAGS;
+    page_g->pml4[0] = (u32)(page_g->pdpt) | PAGE_FLAGS;
 
   if (page_g->pdpt[pdpt_off] == 0)
     page_g->pdpt[pdpt_off] = (u32)(page_g->pdt) | PAGE_FLAGS;
@@ -94,6 +93,5 @@ int mapping(u32 addr, u32 size, page *page_g, int descending)
       page_g->pt[pt_off + i] = page_g->pt[pt_off + i - 1] + PAGE_SIZE;
     }
   }
-
   return 1;
 }

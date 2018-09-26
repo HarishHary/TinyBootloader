@@ -126,21 +126,21 @@ _read_section_drive_error:
 
 ########### INIT GDT ###########
 gdt_begin:
-gdt_null_segment:       #null descriptor, mandatory for some reason
+gdt_null_segment:    #null descriptor, mandatory for some reason
     .long 0x00
     .long 0x00
 gdt_code_segment:    #describes segment where code is stored
     .word 0xffff
     .word 0x00
     .byte 0x00
-    .byte 0b10011011
+    .byte 0b10011010
     .byte 0b11001111
     .byte 0x00
 gdt_data_segment:    #describes segment where data is stored
     .word 0xffff
     .word 0x00
     .byte 0x00
-    .byte 0b10010011
+    .byte 0b10010010
     .byte 0b11001111
     .byte 0x00
 gdt_end:

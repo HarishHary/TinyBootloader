@@ -9,9 +9,8 @@
     idt_set_gate((unsigned long)&idt_print_##num, 0x8, \
     TRAP_GATE | GATE_RING_0 | GATE_SIZE_32, &idt_g[num]);\
 
-void init_idt(void)
+void init_idt(idt *idt_g)
 {
-    static idt idt_g[32];
     define_print(0);
     define_print(1);
     define_print(2);
@@ -44,7 +43,7 @@ void init_idt(void)
     define_print(29);
     define_print(30);
     define_print(31);
-    idt_r idtr;
+    static idt_r idtr;
     idtr.base = (u32)idt_g;
     /* idt base address */
     idtr.limit = sizeof(idt_g) - 1;
@@ -54,6 +53,14 @@ void init_idt(void)
         : "m" (idtr)
         : "memory");
     __asm__ __volatile__("sti\n");
+}
+
+void enable_interrupt(void) {
+  __asm__ __volatile__("sti\n");
+}
+
+void disable_interrupt(void) {
+  __asm__ __volatile__("cli\n");
 }
 
 void idt_set_gate(unsigned long offset, unsigned short ss, idt_flags flags,

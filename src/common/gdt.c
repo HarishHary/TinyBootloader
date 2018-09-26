@@ -1,8 +1,7 @@
 #include "../includes/common/gdt.h"
 
-static gdt gdt_g[6] = {0};
-
-void init_gdt() {
+void init_gdt(void) {
+    static gdt gdt_g[3] = {0};
     /*
      * Null segment
      */
@@ -15,63 +14,40 @@ void init_gdt() {
      * Kernel code segment
      */
     init_gdt_segment(0xffff, 0x0, 0x0,
-                     T_ER, S_CD_DT, R0,
+                     TYPE_ER, S_CD_DT, R0,
                      0x1, 0xff, 0x0,
-                     0x0, DB_32b, 0x1,
+                     0x1, 0x0, 0x1,
                      0x0, &gdt_g[1]);
     /*
      * Kernel data segment
      */
     init_gdt_segment(0xffff, 0x0, 0x0,
-                     T_RW, S_CD_DT, R0,
+                     TYPE_RW, S_CD_DT, R0,
                      0x1, 0xff, 0x0,
-                     0x0, DB_32b, 0x1,
+                     0x1, 0x0, 0x1,
                      0x0, &gdt_g[2]);
-    /*
-     * Userland code segment
-     */
-    init_gdt_segment(0xffff, 0x0, 0x0,
-                     T_ER, S_CD_DT, R3,
-                     0x1, 0xff, 0x0,
-                     0x0, DB_32b, 0x1,
-                     0x0, &gdt_g[3]);
-    /*
-     * Userland data segment
-     */
-    init_gdt_segment(0xffff, 0x0, 0x0,
-                     T_RW, S_CD_DT, R3,
-                     0x1, 0xff, 0x0,
-                     0x0, DB_32b, 0x1,
-                     0x0, &gdt_g[4]);
-    /*
-     * TSS segment
-     */
-    init_gdt_segment(0x0, 0x0, 0x0,
-                     0x0, 0x0, 0x0,
-                     0x0, 0x0, 0x0,
-                     0x0, 0x0, 0x0,
-                     0x0, &gdt_g[5]);
 
-    gdt_r gdtr;
+    static gdt_r gdtr;
     gdtr.base = (u32)gdt_g;
     /* gdt base address */
     gdtr.limit = sizeof(gdt_g) - 1;
     /* gdt size - 1 */
     __asm__ __volatile__("lgdt %0\n"
-            :/* no output */
-            : "m" (gdtr)
-            : "memory");
+                         :/* no output */
+                         : "m" (gdtr)
+                         : "memory"
+                        );
     __asm__ __volatile__("mov %0, %%ds\n\t"
-                "mov %0, %%fs\n\t"
-                "mov %0, %%gs\n\t"
-                "mov %0, %%ss\n\t"
-                "ljmp %1, $next\n\t"
-                "next:\n\t"
-            :
-            :"r" (2 << 3),// index of data
-             "i" (1 << 3) // size cs segment
-            :"ax"
-            );
+                         "mov %0, %%es\n\t"
+                         "mov %0, %%fs\n\t"
+                         "mov %0, %%gs\n\t"
+                         "mov %0, %%ss\n\t"
+                         "ljmp %1, $next\n\t"
+                         "next:\n\t"
+                         :/* no output */
+                         :"r" (2 << 3),// index of data
+                          "i" (1 << 3) // size cs segment
+                        );
 }
 
 void init_gdt_segment( u16 segment_limit, u16 base_address, u8 base16_23,

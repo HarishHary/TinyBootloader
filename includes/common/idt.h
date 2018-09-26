@@ -58,6 +58,8 @@ typedef enum idt_traps {
     X86_TRAP_IRET = 32, /* 32, IRET Exception */
 } idt_traps;
 
-void init_idt(void);
+void init_idt(idt *idt_g);
 void idt_set_gate(unsigned long offset, unsigned short ss, idt_flags flags,
 		  idt *idt_g);
+void enable_interrupt(void);
+void disable_interrupt(void);

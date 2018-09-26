@@ -5,18 +5,18 @@ LD = ld
 CFLAGS = -std=c99
 # binary settings
 CFLAGS+= -Os -fno-pie -ffreestanding
-# architecture settings
-CFLAGS+= -march=i686 -m32
 # errors settings
 CFLAGS+= -Wall -Werror
 # debug
 CFLAGS+= -g
+# architecture settings
+#CFLAGS+= -march=i686 -m32
 # path settings
 CFLAGS+=  -I../../includes \
 					-I../../includes/kernel \
 					-I../../includes/common
 
-LDFLAGS = -melf_i386
+#LDFLAGS = -melf_i386
 LDFLAGS += -no-pie
 LDFLAGS += -Tlinker/kernel.ld
 LDFLAGS += --nmagic
@@ -24,22 +24,30 @@ LDFLAGS += -nostdlib
 
 ELF = kernel
 
-OBJS = 	main.o   \
-				printf.o \
-				serial.o \
-				cpuid.o  \
-				paging.o \
-				../common/idt.o
+OBJS32 = 	main32.o \
+					printf.o \
+					serial.o \
+					cpuid.o  \
+					paging.o \
+					../common/idt.o \
+					../common/gdt.o \
+
+OBJS64 = main64.o
 
 KERNEL = kernel.raw
 
 all: $(KERNEL)
 
-$(ELF): $(OBJS)
-				$(LD) $(LDFLAGS) -o $@ $^
+$(ELF): CFLAGS+= -march=i686 -m32
+$(ELF): $(OBJS32)
+				for I in $^;									\
+				do														\
+				objcopy -O elf64-x86-64 $$I;	\
+				done
+				$(LD) $(LDFLAGS) -o $@ $(OBJS32) $(OBJS64)
 
-$(KERNEL):	$(ELF)
-						objcopy -O binary $^ $@
+$(KERNEL):	$(OBJS64) $(ELF)
+						objcopy -O binary $(ELF) $@
 
 clean:
-	$(RM) $(ELF) $(KERNEL) $(OBJS)
+	$(RM) $(ELF) $(KERNEL) $(OBJS32) $(OBJS64)

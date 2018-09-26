@@ -19,25 +19,24 @@ typedef enum gdt_flags {
 */
 typedef enum TYPE
 {
-    /* data type */
-    T_RO,
-    T_ROA,
-    T_RW,
-    T_RWA,
-    T_ROED,
-    T_ROEDA,
-    T_RWED,
-    T_RWEDA,
-
-    /* code type */
-    T_EO,
-    T_EOA,
-    T_ER,
-    T_ERA,
-    T_EOC,
-    T_EOCA,
-    T_ERC,
-    T_ERCA
+	/* data */
+	TYPE_RO    = 0x00,
+	TYPE_ROA   = 0x01,
+	TYPE_RW    = 0x02,
+	TYPE_RWA   = 0x03,
+	TYPE_ROED  = 0x04,
+	TYPE_ROEDA = 0x05,
+	TYPE_RWED  = 0x06,
+	TYPE_RWEDA = 0x07,
+	/* code */
+	TYPE_EO    = 0x08,
+	TYPE_EOA   = 0x09,
+	TYPE_ER    = 0x0a,
+	TYPE_ERA   = 0x0b,
+	TYPE_EOC   = 0x0c,
+	TYPE_EOCA  = 0x0d,
+	TYPE_ERC   = 0x0e,
+	TYPE_ERCA  = 0x0f
 } TYPE;
 
 /*
@@ -95,7 +94,7 @@ typedef struct __attribute__((__packed__)) gdt_r
     u32 base;
 } gdt_r;
 
-void init_gdt();
+void init_gdt(void);
 void init_gdt_segment( u16 segment_limit, u16 base_address, u8 base16_23,
                       TYPE type_field, S desc_type, DPL dpl,
                       u8 seg_present, u8 limit16_19, u8 avl,
