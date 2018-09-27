@@ -1,60 +1,39 @@
 #include "../includes/common/gdt.h"
 
-void init_gdt(void) {
-    static gdt gdt_g[3] = {0};
-    /*
-     * Null segment
-     */
+static inline void init_gdt_segment(u16 segment_limit, u16 base_address, u8 base16_23,
+                       TYPE type_field, S desc_type, DPL dpl,
+                       u8 seg_present, u8 limit16_19, u8 avl,
+                       u8 l, DB default_oper, u8 granularity,
+                       u8 base24_31, gdt *gdt);
+
+void init_gdt(gdt *gdt_g) {
+    //Null segment
     init_gdt_segment(0x0, 0x0, 0x0,
                      0x0, 0x0, 0x0,
                      0x0, 0x0, 0x0,
                      0x0, 0x0, 0x0,
                      0x0, &gdt_g[0]);
-    /*
-     * Kernel code segment
-     */
+
+    // Kernel code segment
     init_gdt_segment(0xffff, 0x0, 0x0,
                      TYPE_ER, S_CD_DT, R0,
                      0x1, 0xff, 0x0,
                      0x1, 0x0, 0x1,
                      0x0, &gdt_g[1]);
-    /*
-     * Kernel data segment
-     */
+
+    // Kernel data segment
     init_gdt_segment(0xffff, 0x0, 0x0,
                      TYPE_RW, S_CD_DT, R0,
                      0x1, 0xff, 0x0,
                      0x1, 0x0, 0x1,
                      0x0, &gdt_g[2]);
-
-    static gdt_r gdtr;
-    gdtr.base = (u32)gdt_g;
-    /* gdt base address */
-    gdtr.limit = sizeof(gdt_g) - 1;
-    /* gdt size - 1 */
-    __asm__ __volatile__("lgdt %0\n"
-                         :/* no output */
-                         : "m" (gdtr)
-                         : "memory"
-                        );
-    __asm__ __volatile__("mov %0, %%ds\n\t"
-                         "mov %0, %%es\n\t"
-                         "mov %0, %%fs\n\t"
-                         "mov %0, %%gs\n\t"
-                         "mov %0, %%ss\n\t"
-                         "ljmp %1, $next\n\t"
-                         "next:\n\t"
-                         :/* no output */
-                         :"r" (2 << 3),// index of data
-                          "i" (1 << 3) // size cs segment
-                        );
 }
 
-void init_gdt_segment( u16 segment_limit, u16 base_address, u8 base16_23,
+static inline void init_gdt_segment(u16 segment_limit, u16 base_address, u8 base16_23,
                        TYPE type_field, S desc_type, DPL dpl,
                        u8 seg_present, u8 limit16_19, u8 avl,
                        u8 l, DB default_oper, u8 granularity,
-                       u8 base24_31, gdt *gdt ) {
+                       u8 base24_31, gdt *gdt) {
     gdt->segment_limit  =   segment_limit & 0xffff;
     gdt->base_address   =   base_address & 0xffff;
     gdt->base16_23      =   (base16_23 >> 4) & 0xff;

@@ -4,38 +4,22 @@
 #include <kernel/printf.h>
 #include <common/asm.h>
 
-typedef struct __attribute__((__packed__)) idt_r
+typedef struct __attribute__((__packed__)) idt64_r
 {
     u16 limit;
-    u32 base;
-} idt_r;
+    u64 base;
+} idt64_r;
 
-typedef struct __attribute__((__packed__)) idt
+typedef struct __attribute__((__packed__)) idt64
 {
-    u16 offset0_15;
-    u16 ss16_31;
-    u8  ist        : 3;
-    u8  reserved3  : 1;
-    u8  reserved4  : 1;
-    u8  reserved5_7: 3;
-    u8  type8_11   : 4;
-    u8  type12     : 1;
-    u8  dpl        : 2;
-    u8  p          : 1;
-    u16 offset16_31;
-} idt;
-
-typedef enum idt_flags {
-    TASK_GATE      = 0x5,
-    INTERRUPT_GATE = 0x6,
-    TRAP_GATE      = 0x7,
-    GATE_RING_0    = 0x0 << 5,
-    GATE_RING_1    = 0x1 << 5,
-    GATE_RING_2    = 0x2 << 5,
-    GATE_RING_3    = 0x3 << 5,
-    GATE_SIZE_32   = 0x1 << 3,
-    GATE_SIZE_16   = 0x0 << 3
-} idt_flags;
+    u16 offset0_15;    // offset bits 0..15
+    u16 selector16_31; // a code segment selector in GDT or LDT
+    u8 ist;            // bits 0..2 holds Interrupt Stack Table offset, rest of bits zero.
+    u8 type_attr;      // type and attributes
+    u16 offset16_31;   // offset bits 16..31
+    u32 offset32_63;   // offset bits 32..63
+    u32 zero;          // reserved
+} idt64;
 
 /* Interrupts/Exceptions */
 typedef enum idt_traps {
@@ -63,5 +47,5 @@ typedef enum idt_traps {
     X86_TRAP_IRET = 32, /* 32, IRET Exception */
 } idt_traps;
 
-void init_idt(idt *idt_g);
-void enable_idt(idt *idt_g);
+void init_idt64(idt64 *idt_g);
+void enable_idt64(idt64 *idt_g);

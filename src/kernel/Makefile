@@ -25,7 +25,6 @@ LDFLAGS += -nostdlib
 ELF = kernel
 
 OBJS32 = 	main32.o \
-					serial.o \
 					cpuid.o  \
 					paging.o \
 					../common/idt.o \
@@ -33,6 +32,8 @@ OBJS32 = 	main32.o \
 
 OBJS64 = main64.o \
 				 printf.o \
+				 serial.o \
+				 ../common/idt64.o \
 
 KERNEL = kernel.raw
 

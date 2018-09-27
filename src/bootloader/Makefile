@@ -10,7 +10,7 @@ CFLAGS+= -march=i686 -m16
 # errors settings
 CFLAGS+= -Wall -Werror
 # debug
-CFLAGS+= -g
+# CFLAGS+= -g
 # path settings
 CFLAGS+=  -I../../includes\
 					-I../../includes/bootloader

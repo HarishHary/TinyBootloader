@@ -1,13 +1,15 @@
 #include <common/idt.h>
-#include <kernel/serial.h>
 
 #define define_print(num) \
     void idt_print_##num()  \
     { \
-         write("Interrupt "#num, 15); \
+         printf("Interrupt "#num); \
     } \
     idt_set_gate((unsigned long)&idt_print_##num, 0x8, \
     TRAP_GATE | GATE_RING_0 | GATE_SIZE_32, &idt_g[num]);\
+
+static inline void idt_set_gate(unsigned long offset, unsigned short ss, idt_flags flags,
+        idt *idt_g);
 
 void init_idt(idt *idt_g)
 {
@@ -43,27 +45,23 @@ void init_idt(idt *idt_g)
     define_print(29);
     define_print(30);
     define_print(31);
-    static idt_r idtr;
-    idtr.base = (u32)idt_g;
-    /* idt base address */
-    idtr.limit = sizeof(idt_g) - 1;
-    /* idt size - 1 */
-    __asm__ __volatile__("lidt %0\n"
-        : /* no output */
-        : "m" (idtr)
-        : "memory");
-    __asm__ __volatile__("sti\n");
 }
 
-void enable_interrupt(void) {
-  __asm__ __volatile__("sti\n");
+void enable_idt(idt *idt_g)
+{
+  static idt_r idtr;
+  idtr.base = (u32)idt_g;
+  /* idt base address */
+  idtr.limit = sizeof(idt_g) - 1;
+  /* idt size - 1 */
+  __asm__ __volatile__ ("lidt %0\n"
+                        : /* no output */
+                        : "m" (idtr)
+                        : "memory");
+  enable_interrupt();
 }
 
-void disable_interrupt(void) {
-  __asm__ __volatile__("cli\n");
-}
-
-void idt_set_gate(unsigned long offset, unsigned short ss, idt_flags flags,
+static inline void idt_set_gate(unsigned long offset, unsigned short ss, idt_flags flags,
     idt *idt_g)
 {
     idt_g->offset0_15   = (offset & 0xFFFF);

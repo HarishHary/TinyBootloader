@@ -2,21 +2,9 @@
 
 #include "types.h"
 
-typedef enum gdt_flags {
-    READ         = 0x0,
-    ACCESS       = 0x1,
-    WRITE        = 0x1 << 1,
-    EXPAND_DOWN  = 0x1 << 2,
-    EXECUTE      = 0x1 << 3,
-    CODE_OR_DATA = 0x1 << 4, /* 0x10 */
-    RING_1       = 0x1 << 5,
-    RING_2       = 0x2 << 5,
-    RING_3       = 0x3 << 5
-} gdt_flags;
-
 /*
-* Segment types
-*/
+ * Segment types
+ */
 typedef enum TYPE
 {
 	/* data */
@@ -40,8 +28,8 @@ typedef enum TYPE
 } TYPE;
 
 /*
-* Descriptor type (0 = system; 1 = code or data)
-*/
+ * Descriptor type (0 = system; 1 = code or data)
+ */
 typedef enum S
 {
     S_SYS,
@@ -49,8 +37,8 @@ typedef enum S
 } S;
 
 /*
-* Descriptor privilege level
-*/
+ * Descriptor privilege level
+ */
 typedef enum DPL
 {
     R0,
@@ -60,8 +48,8 @@ typedef enum DPL
 } DPL;
 
 /*
-* Default operation size (0 = 16-bit segment; 1 = 32-bit segment)
-*/
+ * Default operation size (0 = 16-bit segment; 1 = 32-bit segment)
+ */
 typedef enum DB
 {
     DB_16b,
@@ -69,8 +57,8 @@ typedef enum DB
 } DB;
 
 /*
-* GDT Main Structure
-*/
+ * GDT Main Structure
+ */
 typedef struct __attribute__((__packed__)) gdt
 {
     u16 segment_limit;   /* Segment limit 0:15 */
@@ -88,15 +76,11 @@ typedef struct __attribute__((__packed__)) gdt
     u8 base24_31;        /* Base 24:31 */
 } gdt;
 
+
 typedef struct __attribute__((__packed__)) gdt_r
 {
     u16 limit;
     u64 base;
 } gdt_r;
 
-void init_gdt(void);
-void init_gdt_segment( u16 segment_limit, u16 base_address, u8 base16_23,
-                      TYPE type_field, S desc_type, DPL dpl,
-                      u8 seg_present, u8 limit16_19, u8 avl,
-                      u8 l, DB default_oper, u8 granularity,
-                      u8 base24_31, gdt *gdt );
+void init_gdt(gdt *gdt_g);
