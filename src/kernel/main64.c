@@ -8,13 +8,17 @@ extern void win(int (*printf_ptr)(const char *fmt, ...));
 
 void main64() {
   /*
-   * Init 32bit idt && Enable 32bit idt
+   * Init 64bit idt && Enable 64bit idt
    */
   static idt64 idt64_g[32] = {0};
   init_idt64(idt64_g);
   enable_idt64(idt64_g);
 
-  printf("Hello World !\n");
-  __asm__ __volatile__("int $0x10");
-  idle();
+  #ifdef EXTRA_OBJECT
+    win(printf);
+  #else
+    printf("No extra object !\n");
+  #endif
+
+  halt();
 }

@@ -1,0 +1,55 @@
+#include <bootloader/drive.h>
+
+int read_param_drive(drive *drive_g) {
+  u8 error = 0;
+  volatile static u16 ret_cx = 0;
+  volatile static u16 ret_dx = 0;
+  volatile const u16 dx = drive_g->drive_id;
+  __asm__ __volatile__ ("mov %2, %%es\n"
+                        "mov $0, %%di\n"
+                        "int $0x13\n"
+                        :"=c" (ret_cx),
+                         "=d" (ret_dx)
+                        :"a"(0x08 << 8 | 0x0),
+                         "d"(dx >> 8),
+                         "D"(0)
+                       );
+
+  __asm__ __volatile__("setc %b0"
+                       :"=r" (error)
+                      );
+
+  if (!error)
+  {
+    drive_g->spt   = (u16)(ret_cx & 0x3f);
+    drive_g->heads = (u16)(ret_dx >> 8);
+  }
+  return !error;
+}
+
+int read_section_drive(u32 addr, u16 lba, u32 nb_sectors, drive *drive_g) {
+  u8 error = 0;
+  u8 al = 0;
+  const u32 cylinder = lba / (drive_g->heads * drive_g->spt);
+  const u32 head   = (lba / drive_g->spt) % drive_g->heads;
+  const u32 sector = (lba % drive_g->spt) + 1;
+
+  __asm__ __volatile__("mov %0, %%es"
+                       :
+                       :"r"((u16)(addr < 0x100000 ? addr & 0xFFFF : (addr & 0xFFFF) + 0x10))
+                      );
+
+  __asm__ __volatile__("int $0x13"
+                       :"=a"(al)
+                       :"a"((u16)(0x02 << 8 | nb_sectors)),
+                        "b"((u16)(addr < 0x100000 ? (addr >> 4) & 0xFFFF : 0xFFFF)),
+                        "c"((u16)((cylinder << 8) | sector)),
+                        "d"((u16)((head << 8) | drive_g->drive_id))
+                      );
+
+  __asm__ __volatile__("setc %b0"
+                       :"=r" (error)
+                      );
+
+  return !error && al == nb_sectors;
+}

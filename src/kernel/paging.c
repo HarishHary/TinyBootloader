@@ -60,10 +60,10 @@ int mapping(u32 addr, u32 size, page *page_g, int descending)
 {
   static u32 PAGE_SIZE  = 4096;
   static u32 PAGE_FLAGS = 0x1 | 0x2 | 0x0; // kernel & read_write & present
-  volatile const u32 pages_nb = (size / PAGE_SIZE) + (size % PAGE_SIZE != 0);
-  volatile const u32 pt_off   = (addr >> 12) & 0x1ff;
-  volatile const u32 pdt_off  = (addr >> 21) & 0x1ff;
-  volatile const u32 pdpt_off = (addr >> 30) & 0x1ff;
+  const u32 pages_nb = (size / PAGE_SIZE) + (size % PAGE_SIZE != 0);
+  const u32 pt_off   = (addr >> 12) & 0x1ff;
+  const u32 pdt_off  = (addr >> 21) & 0x1ff;
+  const u32 pdpt_off = (addr >> 30) & 0x1ff;
 
   if (page_g->pml4[0] == 0)
     page_g->pml4[0] = (u32)(page_g->pdpt) | PAGE_FLAGS;

@@ -1,24 +1,48 @@
+ENTRY(main)
+
 SECTIONS
 {
 	. = 0x7C00;
-	.text : AT(0x7C00)
+	.stage1_text : AT(0x7C00)
 	{
-		*(.start)
-		*(.text*)
+		*(.stage1)
+		stage1.o(.text*)
 	}
-	.data :
+	.stage1_data :
 	{
-		_data = .;
-		*(.bss*);
-		*(.data*);
-		*(.rodata*);
-		_data_end = .;
+		stage1.o(.bss*)
+		stage1.o(.data*)
+		stage1.o(.rodata*)
 	}
+
 	. = 0x7DFE;
 	.signature : AT(0x7DFE)
 	{
-		SHORT(0xaa55);
+		SHORT(0xAA55);
 	}
+
+	.stage2_text :
+  {
+    *(.stage2)
+    *(.text*)
+  }
+  .stage2_data :
+  {
+	  _data = .;
+    *(.bss*);
+    *(.data*);
+    *(.rodata*);
+		_data_end = .;
+  }
+
+	.padding_start : {
+		BYTE(0x0);
+	}
+	. = ALIGN(512) - 1;
+	.padding_end : {
+		BYTE(0x0);
+	}
+
 	/DISCARD/ :
 	{
 		*(.note*);

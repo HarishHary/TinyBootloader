@@ -114,3 +114,70 @@ _enable_A20_ERROR:
 0x0000000000000000
 0x00cf9b000000ffff
 0x00cf93000000ffff
+
+
+/*
+ * Init 32bit gdt && Enable 32bit gdt
+ */
+static gdt32 gdt32_g[3] = {0};
+init_gdt32(gdt32_g);
+static gdt32_r gdtr32;
+gdtr32.base = (u32)gdt32_g;
+gdtr32.limit = sizeof(gdt32_g) - 1;
+__asm__ __volatile__("lgdt %0\n"
+                     :/* no output */
+                     : "m" (gdtr32)
+                     : "memory"
+                    );
+__asm__ __volatile__("mov %0, %%ds\n\t"
+                     "mov %0, %%es\n\t"
+                     "mov %0, %%fs\n\t"
+                     "mov %0, %%gs\n\t"
+                     "mov %0, %%ss\n\t"
+                     "ljmp %1, $next\n\t"
+                     "next:\n\t"
+                     :/* no output */
+                     :"r" (2 << 3),// index of data
+                      "i" (1 << 3) // size cs segment
+                    );
+
+
+SECTIONS
+{
+	. = 0x7C00;
+	.text : AT(0x7C00)
+	{
+		*(.start)
+		*(.text*)
+	}
+	.data :
+	{
+		_data = .;
+		*(.bss*);
+		*(.data*);
+ 	  *(.rodata*);
+    _data_end = .;
+	}
+
+	. = 0x7DFE;
+	.signature : AT(0x7DFE)
+	{
+		SHORT(0xAA55);
+	}
+
+  .end :
+  {
+    BYTE(0x0)
+    . = ALIGN(512) - 1;
+    BYTE(0x0)
+  }
+
+	/DISCARD/ :
+	{
+		*(.note*);
+		*(.iplt*);
+		*(.igot*);
+		*(.rel*);
+		*(.comment);
+	}
+}

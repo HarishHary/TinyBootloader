@@ -1,25 +1,16 @@
 CC = gcc
 LD = ld
 
-# language settings
-CFLAGS = -std=c99
-# binary settings
-CFLAGS+= -Os -fno-pie -ffreestanding
-# architecture settings
-CFLAGS+= -march=i686 -m16
-# errors settings
-CFLAGS+= -Wall -Werror
+CFLAGS = -std=c99 -Os -fno-pie -ffreestanding -march=i686 -m16 -Wall -Werror -fno-stack-protector
+
 # debug
-# CFLAGS+= -g
-# path settings
-CFLAGS+=  -I../../includes\
+CFLAGS+= -g
+# include path settings
+CFLAGS+=  -I../../includes \
+					-I../../includes/common \
 					-I../../includes/bootloader
 
-LDFLAGS = -melf_i386
-LDFLAGS += -no-pie
-LDFLAGS += -Tlinker/bootloader.ld
-LDFLAGS += --nmagic
-LDFLAGS += -nostdlib
+LDFLAGS = -melf_i386 -no-pie -Tlinker/bootloader.ld --nmagic -nostdlib
 
 ELF = bootloader
 BOOTLOADER = bootloader.raw
@@ -28,7 +19,11 @@ KERNEL = kernel.raw
 KERNEL_SIZE = $(shell stat -c %s ../kernel/$(KERNEL))
 CFLAGS += -DKERNEL_SIZE=$(KERNEL_SIZE)
 
-OBJS = bootloader.o
+OBJS = stage1.o \
+			 stage2.o \
+			 mem.o		\
+			 drive.o	\
+			 ../common/gdt32.o	\
 
 all: $(BOOTLOADER)
 

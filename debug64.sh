@@ -1,8 +1,7 @@
 #!/bin/sh
 
 mv ~/.gdbinit ~/.gdbinit.old
-make clean
-make
+make check
 qemu-system-x86_64 -fda hello64 -nographic -serial stdio -monitor none -s -S -d in_asm,exec 2> instr &
 sleep 1
 gdb -ex 'target remote localhost:1234'    \
