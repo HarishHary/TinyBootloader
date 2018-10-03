@@ -7,5 +7,5 @@ sleep 1
 gdb -ex 'target remote localhost:1234'    \
     -ex 'break *0x100000'                 \
     -ex 'continue'                        \
-    -ex 'layout split'                    \
+    -ex 'layout asm'                      \
     -ex 'symbol-file ./src/kernel/kernel' \

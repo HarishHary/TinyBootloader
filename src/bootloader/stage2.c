@@ -58,8 +58,13 @@ void stage2(u16 id) {
                        :"r" (2 << 3),// index of data
                         "i" (1 << 3) // size cs segment
                       );
-  __asm__ __volatile__("jmp *%0"
+
+  __asm__ __volatile__("push %1\n"
+                       "push %0\n"
+                       "push %1\n"
+                       "jmp *%0\n"
                        :
-                       :"r"(kaddr)
+                       :"r"(kaddr),
+                        "r"(klen)
                       );
 }

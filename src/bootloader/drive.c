@@ -38,7 +38,6 @@ int read_section_drive(u32 addr, u16 lba, u32 nb_sectors, drive *drive_g) {
                        :"r"((u16)(addr < 0x100000 ? (addr >> 4) & 0xF000 : 0xFFFF))
                       );
 
-
   __asm__ __volatile__("int $0x13"
                        :"=a"(al)
                        :"a"((u16)(0x02 << 8 | nb_sectors)),

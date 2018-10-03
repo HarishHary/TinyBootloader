@@ -53,11 +53,6 @@ void main(void) {
     offset = ((u32)stage2 & 0xffff) + 0x10;
   }
 
-  volatile const u16 ax = (u16)(0x2 << 8 | 2);
-  volatile const u16 bx = (u16)offset;
-  volatile const u16 cx = (u16)((cylinder  << 8) | sector);
-  volatile const u16 dx = (u16)((head << 8) | drive_id);
-
   __asm__ __volatile__("mov %0, %%es"
                        :
                        :"r"((u16)selector)
@@ -65,10 +60,10 @@ void main(void) {
 
   __asm__ __volatile__("int $0x13"
                        :"=a"(al)
-                       :"a"(ax),
-                        "b"(bx),
-                        "c"(cx),
-                        "d"(dx)
+                       :"a"((u16)(0x02 << 8 | 2)),
+                        "b"((u16)offset),
+                        "c"((u16)((cylinder << 8) | sector)),
+                        "d"((u16)((head << 8) | drive_id))
                       );
 
   __asm__ __volatile__("setc %b0"
