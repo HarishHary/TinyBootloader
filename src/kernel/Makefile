@@ -1,7 +1,7 @@
 CC = gcc
 LD = ld
 
-CFLAGS = -std=c99 -Os -fno-pie -ffreestanding -Wall -Werror -fno-stack-protector -fno-stack-protector  
+CFLAGS = -std=c99 -Os -fno-pie -ffreestanding -Wall -Werror -fno-stack-protector
 # debug
 CFLAGS += -g
 # include path settings

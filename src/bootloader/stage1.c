@@ -64,15 +64,11 @@ void main(void) {
                       );
 
   __asm__ __volatile__("int $0x13"
-                       :
+                       :"=a"(al)
                        :"a"(ax),
                         "b"(bx),
                         "c"(cx),
                         "d"(dx)
-                      );
-
-  __asm__ __volatile__(""
-                       :"=a"(al)
                       );
 
   __asm__ __volatile__("setc %b0"

@@ -35,11 +35,9 @@ SECTIONS
 		_data_end = .;
   }
 
-	.padding_start : {
-		BYTE(0x0);
-	}
-	. = ALIGN(512) - 1;
 	.padding_end : {
+		BYTE(0x0);
+	. = ALIGN(512) - 1;
 		BYTE(0x0);
 	}
 

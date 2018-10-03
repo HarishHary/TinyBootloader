@@ -5,14 +5,13 @@ int read_param_drive(drive *drive_g) {
   volatile static u16 ret_cx = 0;
   volatile static u16 ret_dx = 0;
   volatile const u16 dx = drive_g->drive_id;
-  __asm__ __volatile__ ("mov %2, %%es\n"
-                        "mov $0, %%di\n"
-                        "int $0x13\n"
+  __asm__ __volatile__ ("int $0x13\n"
                         :"=c" (ret_cx),
                          "=d" (ret_dx)
                         :"a"(0x08 << 8 | 0x0),
                          "d"(dx >> 8),
                          "D"(0)
+                        :"%ebx"
                        );
 
   __asm__ __volatile__("setc %b0"
@@ -36,13 +35,14 @@ int read_section_drive(u32 addr, u16 lba, u32 nb_sectors, drive *drive_g) {
 
   __asm__ __volatile__("mov %0, %%es"
                        :
-                       :"r"((u16)(addr < 0x100000 ? addr & 0xFFFF : (addr & 0xFFFF) + 0x10))
+                       :"r"((u16)(addr < 0x100000 ? (addr >> 4) & 0xF000 : 0xFFFF))
                       );
+
 
   __asm__ __volatile__("int $0x13"
                        :"=a"(al)
                        :"a"((u16)(0x02 << 8 | nb_sectors)),
-                        "b"((u16)(addr < 0x100000 ? (addr >> 4) & 0xFFFF : 0xFFFF)),
+                        "b"((u16)(addr < 0x100000 ? addr & 0xFFFF : (addr & 0xFFFF) + 0x10)),
                         "c"((u16)((cylinder << 8) | sector)),
                         "d"((u16)((head << 8) | drive_g->drive_id))
                       );

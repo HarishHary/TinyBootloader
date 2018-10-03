@@ -28,11 +28,6 @@ void stage2(u16 id) {
     halt();
 
   /*
-   * Disable interrupts
-   */
-  disable_interrupt();
-
-  /*
    * Init 32bit gdt && Enable 32bit gdt
    */
   static gdt32 gdt32_g[3] = {0};
@@ -45,6 +40,13 @@ void stage2(u16 id) {
                        : "m" (gdtr32)
                        : "memory"
                       );
+
+  __asm__ __volatile__("mov %cr0, %eax\n"
+                       "orl $0x1, %eax\n"
+                       "cli\n"
+                       "mov %eax, %cr0"
+                      );
+
   __asm__ __volatile__("mov %0, %%ds\n\t"
                        "mov %0, %%es\n\t"
                        "mov %0, %%fs\n\t"
@@ -55,5 +57,9 @@ void stage2(u16 id) {
                        :/* no output */
                        :"r" (2 << 3),// index of data
                         "i" (1 << 3) // size cs segment
+                      );
+  __asm__ __volatile__("jmp *%0"
+                       :
+                       :"r"(kaddr)
                       );
 }
