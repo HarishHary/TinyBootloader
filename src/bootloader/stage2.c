@@ -51,6 +51,7 @@ void stage2(drive *drive_g) {
                        "mov %0, %%gs\n\t"
                        "mov %0, %%ss\n\t"
                        "ljmp %1, $next\n\t"
+                       ".code32\n"
                        "next:\n\t"
                        :/* no output */
                        :"r" (2 << 3),// index of data
@@ -59,7 +60,7 @@ void stage2(drive *drive_g) {
 
   __asm__ __volatile__("jmp *%0\n"
                        :
-                       :"a"(kaddr),
+                       :"b"(kaddr),
                         "d"(klen)
                       );
 }

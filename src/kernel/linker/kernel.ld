@@ -18,7 +18,7 @@ SECTIONS
 	}
 	.padding_end : {
 		BYTE(0x0);
-	. = ALIGN(512) - 1;
+	  . = ALIGN(512) - 1;
 		BYTE(0x0);
 	}
 }
