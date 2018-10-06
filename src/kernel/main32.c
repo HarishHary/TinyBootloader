@@ -6,8 +6,19 @@
 #include <kernel/paging.h>
 #include <kernel/main64.h>
 
+__attribute__((regparm(2)))
 void main(const u32 kaddr, const u32 klen)
 {
+  /*
+   * Get parameters from real mode FIXME still need to understand
+   * why I can't use it directly
+   */
+  volatile static u32 kkaddr = 0;
+  volatile static u32 kklen = 0;
+  __asm__ __volatile__(""
+                       :"=b"(kkaddr),
+                        "=d"(kklen)
+                      );
   /*
    * Init 32bit idt && Enable 32bit idt
    */
@@ -41,7 +52,7 @@ void main(const u32 kaddr, const u32 klen)
    * Init page tables && Enable paging
    */
   static page pages = {.pml4 = {0}, .pdpt = {0}, .pdt = {0}, .pt = {0}};
-  if (!init_page_tables(kaddr, klen, saddr, slen, &pages))
+  if (!init_page_tables(kkaddr, kklen, saddr, slen, &pages))
     halt();
   enable_paging((u32)pages.pml4);
 

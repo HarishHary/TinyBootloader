@@ -7,12 +7,18 @@ SECTIONS
 	{
 		*(.stage1)
 		stage1.o(.text*)
+		drive.o(.text*)
 	}
 	.stage1_data :
 	{
+		_data = .;
 		stage1.o(.bss*)
 		stage1.o(.data*)
 		stage1.o(.rodata*)
+		drive.o(.bss*)
+		drive.o(.data*)
+		drive.o(.rodata*)
+		_data_end = .;
 	}
 
 	. = 0x7DFE;
@@ -35,9 +41,10 @@ SECTIONS
 		_data_end = .;
   }
 
-	.padding_end : {
+	.padding_end :
+	{
 		BYTE(0x0);
-	. = ALIGN(512) - 1;
+	  . = ALIGN(512) - 1;
 		BYTE(0x0);
 	}
 
@@ -47,6 +54,6 @@ SECTIONS
 		*(.iplt*);
 		*(.igot*);
 		*(.rel*);
-		*(.comment);
+		*(.comment*);
 	}
 }

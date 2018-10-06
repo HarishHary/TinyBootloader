@@ -2,14 +2,11 @@
 
 int read_param_drive(drive *drive_g) {
   u8 error = 0;
-  volatile static u16 ret_cx = 0;
-  volatile static u16 ret_dx = 0;
-  volatile const u16 dx = drive_g->drive_id;
   __asm__ __volatile__ ("int $0x13\n"
-                        :"=c" (ret_cx),
-                         "=d" (ret_dx)
+                        :"=c" (drive_g->spt),
+                         "=d" (drive_g->heads)
                         :"a"(0x08 << 8 | 0x0),
-                         "d"(dx >> 8),
+                         "d"(drive_g->drive_id >> 8),
                          "D"(0)
                         :"%ebx"
                        );
@@ -20,8 +17,8 @@ int read_param_drive(drive *drive_g) {
 
   if (!error)
   {
-    drive_g->spt   = (u16)(ret_cx & 0x3f);
-    drive_g->heads = (u16)(ret_dx >> 8);
+    drive_g->spt   = (u16)(drive_g->spt & 0x3f);
+    drive_g->heads = (u16)(drive_g->heads >> 8);
   }
   return !error;
 }

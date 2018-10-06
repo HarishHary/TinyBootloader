@@ -11,9 +11,7 @@ static inline u32 nb_sectors(u32 size)
 }
 
 __attribute__((section(".stage2")))
-void stage2(u16 id) {
-  static drive drive_g = {0};
-  drive_g.drive_id = id;
+void stage2(drive *drive_g) {
   static memory_region region_g = {0};
   if (!detect_upper_mem(&region_g))
     halt();
@@ -21,10 +19,10 @@ void stage2(u16 id) {
   u32 kaddr = region_g.base_low;
   u32 klen = KERNEL_SIZE;
 
-  if (!read_param_drive(&drive_g))
-    halt();
-
-  if (!read_section_drive(kaddr, 3, nb_sectors(klen), &drive_g))
+  /*
+   * Load kernel code from disk
+   */
+  if (!read_section_drive(kaddr, 3, nb_sectors(klen), drive_g))
     halt();
 
   /*
@@ -37,8 +35,8 @@ void stage2(u16 id) {
   gdtr32.limit = sizeof(gdt32_g) - 1;
   __asm__ __volatile__("lgdt %0\n"
                        :/* no output */
-                       : "m" (gdtr32)
-                       : "memory"
+                       :"m" (gdtr32)
+                       :"memory"
                       );
 
   __asm__ __volatile__("mov %cr0, %eax\n"
@@ -59,12 +57,9 @@ void stage2(u16 id) {
                         "i" (1 << 3) // size cs segment
                       );
 
-  __asm__ __volatile__("push %1\n"
-                       "push %0\n"
-                       "push %1\n"
-                       "jmp *%0\n"
+  __asm__ __volatile__("jmp *%0\n"
                        :
-                       :"r"(kaddr),
-                        "r"(klen)
+                       :"a"(kaddr),
+                        "d"(klen)
                       );
 }

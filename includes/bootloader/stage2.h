@@ -1,3 +1,3 @@
 #pragma once
 
-void stage2(u16 id);
+void stage2(drive *drive_g);
