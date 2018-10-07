@@ -17,7 +17,7 @@ bootloader:
 	@$(MAKE) -C $(BOOTLOADER_DIR)
 
 check: clean $(TEST_OBJS)
-			@EXTRA_OBJECT=$(TEST_OBJS) $(MAKE) all
+	@EXTRA_OBJECT=$(TEST_OBJS) $(MAKE) all
 
 .PHONY: clean
 

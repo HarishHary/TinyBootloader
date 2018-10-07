@@ -28,18 +28,18 @@ SECTIONS
 	}
 
 	.stage2_text :
-  {
-    *(.stage2)
-    *(.text*)
-  }
-  .stage2_data :
-  {
-	  _data = .;
-    *(.bss*);
-    *(.data*);
-    *(.rodata*);
+	{
+		*(.stage2)
+		*(.text*)
+	}
+	.stage2_data :
+	{
+		_data = .;
+		*(.bss*);
+		*(.data*);
+		*(.rodata*);
 		_data_end = .;
-  }
+	}
 
 	.padding_end :
 	{
