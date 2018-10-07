@@ -10,8 +10,19 @@ static inline u32 nb_sectors(u32 size)
   return size / 512 + (size % 512 != 0);
 }
 
+static inline void enable_a20_bios(void)
+{
+  __asm__ __volatile__("int $0x15"
+                       :
+                       :"a"(0x2401)
+                      );
+}
+
 __attribute__((section(".stage2")))
 void stage2(drive *drive_g) {
+
+  enable_a20_bios();
+
   static memory_region region_g = {0};
   if (!detect_upper_mem(&region_g))
     halt();
