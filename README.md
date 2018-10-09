@@ -6,7 +6,6 @@ The source code uses as little assembler as possible.
 ## Authors
 
 Harish SEGAR <segar_h@epita.fr>
-Martin LEYDIER <leydie_m@epita.fr>
 
 ## Requirements
 
