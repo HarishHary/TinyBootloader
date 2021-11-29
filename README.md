@@ -3,10 +3,6 @@
 This project is a simple bootloader written in C which prints some message to the COM1 serial line.
 The source code uses as little assembler as possible.
 
-## Authors
-
-Harish SEGAR <segar_h@epita.fr>
-
 ## Requirements
 
 - GNU C Compiler
